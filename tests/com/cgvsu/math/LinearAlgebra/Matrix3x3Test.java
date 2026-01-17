@@ -255,4 +255,29 @@ public class Matrix3x3Test {
         assertTrue(str.contains("1.0"));
         assertTrue(str.contains("9.0"));
     }
+
+    @Test
+    public void testDet(){
+        Matrix3x3 m = new Matrix3x3(new float[][]{
+                {1, -2, 3},
+                {4, 0, 6},
+                {-7, 8, 9},
+        });
+        assertEquals(m.det(), 204);
+    }
+
+    @Test
+    public void testInverse(){
+        Matrix3x3 m = new Matrix3x3(new float[][]{
+                {2, 5, 7},
+                {6, 3, 4},
+                {5, -2, -3},
+        });
+        Matrix3x3 expected = new Matrix3x3(new float[][]{
+                {1, -1, 1},
+                {-38, 41, -34},
+                {27, -29, 24},
+        });
+        assertEquals(m.inverse(), expected);
+    }
 }

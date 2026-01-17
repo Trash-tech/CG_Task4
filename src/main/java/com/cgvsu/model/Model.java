@@ -1,30 +1,36 @@
 package com.cgvsu.model;
 
+import com.cgvsu.math.AffineTransformer;
 import com.cgvsu.math.LinearAlgebra.Vector2D;
 import com.cgvsu.math.LinearAlgebra.Vector3D;
 
 import java.util.ArrayList;
 
 public class Model {
-    public ArrayList<Vector3D> vertices = new ArrayList<>();
-    public ArrayList<Vector2D> textureVertices = new ArrayList<>();
-    public ArrayList<Vector3D> normals = new ArrayList<>();
-    public ArrayList<Polygon> polygons = new ArrayList<>();
+    private ArrayList<Vector3D> vertices = new ArrayList<>();
+    private ArrayList<Vector2D> textureVertices = new ArrayList<>();
+    private ArrayList<Vector3D> normals = new ArrayList<>();
+    private ArrayList<Polygon> polygons = new ArrayList<>();
+    private AffineTransformer affineTransformer = new AffineTransformer();
+
+    public AffineTransformer getAffineTransformer(){
+        return affineTransformer;
+    }
 
     public ArrayList<Polygon> getPolygons() {
-        return polygons;//new ArrayList<>(polygons);
+        return polygons;
     }
 
     public ArrayList<Vector2D> getTextureVertices() {
-        return textureVertices;//new ArrayList<>(textureVertices);
+        return textureVertices;
     }
 
     public ArrayList<Vector3D> getNormals() {
-        return normals;//new ArrayList<>(normals);
+        return normals;
     }
 
     public ArrayList<Vector3D> getVertices() {
-        return vertices;//new ArrayList<>(vertices);
+        return vertices;
     }
 
     public void setNormals(ArrayList<Vector3D> normals) {
@@ -41,5 +47,22 @@ public class Model {
 
     public void setVertices(ArrayList<Vector3D> vertices) {
         this.vertices = vertices;
+    }
+
+    public Model applyModelTransformationForSafeForOBJWriter() {
+        Model model = new Model();
+        model.setVertices(affineTransformer.verticesTransformation(cloneArrayList(vertices)));
+        model.setNormals(affineTransformer.normalTransformation(cloneArrayList(normals)));
+        model.setPolygons(polygons);
+        model.setTextureVertices(textureVertices);
+        return model;
+    }
+
+    public static ArrayList<Vector3D> cloneArrayList(ArrayList<Vector3D> a){
+        ArrayList<Vector3D> result = new ArrayList<>();
+        for (int i = 0; i < a.size(); i++){
+            result.add(new Vector3D(a.get(i).getData()));
+        }
+        return result;
     }
 }

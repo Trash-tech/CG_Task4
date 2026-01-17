@@ -6,19 +6,15 @@ import com.cgvsu.math.LinearAlgebra.Vector2D;
 import com.cgvsu.math.LinearAlgebra.Vector3D;
 
 public class GraphicConveyor {
-
+/*
     public static Matrix4x4 rotateScaleTranslate(
             float sx, float sy, float sz,
             float rx, float ry, float rz,
             float tx, float ty, float tz) {
-        /*float[][] matrix = new float[][]{
-                {1, 0, 0, 0},
-                {0, 1, 0, 0},
-                {0, 0, 1, 0},
-                {0, 0, 0, 1}};
-         */
         return AffineTransformer.createModelMatrix(sx, sy, sz, rx, ry, rz, tx, ty, tz);
     }
+
+ */
 
     public static Matrix4x4 lookAt(Vector3D eye, Vector3D target) {
         return lookAt(eye, target, new Vector3D(0F, 1.0F, 0F));

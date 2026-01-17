@@ -19,6 +19,10 @@ public abstract class Matrix<T extends Matrix<T>> extends LinearAlgebraObject{
         return data.clone();
     }
 
+    public float getDataByIndexes(int i, int j){
+        return data[i][j];
+    }
+
     protected abstract T createNew(float[][] data);
     //public abstract T zeroMatrix();
     //public abstract T oneMatrix();
