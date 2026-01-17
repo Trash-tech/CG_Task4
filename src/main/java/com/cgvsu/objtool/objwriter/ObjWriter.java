@@ -34,11 +34,20 @@ public class ObjWriter {
         sb.append("# Exported by ObjWriter\n");
 
         writeVertices(model, sb);
-        sb.append('\n');
+        if (model.getVertices() != null && !model.getVertices().isEmpty()) {
+            sb.append('\n');
+        }
+
         writeTextureVertices(model, sb);
-        sb.append('\n');
+        if (model.getTextureVertices() != null && !model.getTextureVertices().isEmpty()) {
+            sb.append('\n');
+        }
+
         writeNormals(model, sb);
-        sb.append('\n');
+        if (model.getNormals() != null && !model.getNormals().isEmpty()) {
+            sb.append('\n');
+        }
+
         writePolygons(model, sb);
 
         return sb.toString();
@@ -108,6 +117,12 @@ public class ObjWriter {
             //validatePolygon(polygon, i)
 
             List<Integer> vertexIndices = polygon.getVertexIndices();
+
+            if (vertexIndices == null || vertexIndices.isEmpty()) {
+                sb.append("# Polygon ").append(i).append(" has no vertex indices\n");
+                continue; // пропускаем невалидный полигон
+            }
+
             List<Integer> textureVertexIndices = polygon.getTextureVertexIndices();
             List<Integer>normalIndices = polygon.getNormalIndices();
 
@@ -132,13 +147,15 @@ public class ObjWriter {
         }
     }
 
+    private static final DecimalFormat FLOAT_FORMAT =
+            new DecimalFormat("0.######", new DecimalFormatSymbols(Locale.US));
+
     public static String formatFloatCompact(float value) {
         if (!Float.isFinite(value)) {
             throw new ObjWriterException("Invalid float value: " + value);
         }
-
-        DecimalFormat df = new DecimalFormat("0.######", new DecimalFormatSymbols(Locale.US));
-
-        return df.format(value);
+        synchronized (FLOAT_FORMAT) {
+            return FLOAT_FORMAT.format(value);
+        }
     }
 }
