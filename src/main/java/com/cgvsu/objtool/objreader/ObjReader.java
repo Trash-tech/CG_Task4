@@ -17,13 +17,24 @@ public class ObjReader {
 	private static final String OBJ_FACE_TOKEN = "f";
 
 	public static Model read(String fileContent) {
+
+		if (fileContent == null || fileContent.isBlank()) {
+			throw new ObjReaderException("File content is empty or null.", 0);
+		}
+
 		Model result = new Model();
 
 		int lineInd = 0;
 		Scanner scanner = new Scanner(fileContent);
 		while (scanner.hasNextLine()) {
-			final String line = scanner.nextLine();
-			ArrayList<String> wordsInLine = new ArrayList<String>(Arrays.asList(line.split("\\s+")));
+			final String line = scanner.nextLine().trim();
+
+			// Игнорируем пустые строки и комментарии
+			if (line.isEmpty() || line.startsWith("#")) {
+				continue;
+			}
+
+			ArrayList<String> wordsInLine = new ArrayList<>(Arrays.asList(line.split("\\s+")));
 			if (wordsInLine.isEmpty()) {
 				continue;
 			}
