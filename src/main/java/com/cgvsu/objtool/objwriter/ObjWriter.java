@@ -1,7 +1,7 @@
 package com.cgvsu.objtool.objwriter;
 
-import com.cgvsu.math.Vector2f;
-import com.cgvsu.math.Vector3f;
+import com.cgvsu.math.LinearAlgebra.Vector2D;
+import com.cgvsu.math.LinearAlgebra.Vector3D;
 import com.cgvsu.model.Model;
 import com.cgvsu.model.Polygon;
 
@@ -55,14 +55,14 @@ public class ObjWriter {
 
     //Vertices
     private static void writeVertices(Model model, StringBuilder sb) {
-        List<Vector3f> vertices = model.getVertices();
+        List<Vector3D> vertices = model.getVertices();
         if (vertices == null || vertices.isEmpty()) {
             sb.append("# Model has no vertices\n");
             return;
         }
 
         for (int i = 0; i < vertices.size(); i++) {
-            Vector3f vertex = vertices.get(i);
+            Vector3D vertex = vertices.get(i);
             //validateVertex(vertex, i);
             sb.append("v ")
                     .append(formatFloatCompact(vertex.getX())).append(" ")
@@ -73,14 +73,14 @@ public class ObjWriter {
 
     //Texture vertices
     private static void writeTextureVertices(Model model, StringBuilder sb) {
-        List<Vector2f> textureVertices = model.getTextureVertices();
+        List<Vector2D> textureVertices = model.getTextureVertices();
         if (textureVertices == null || textureVertices.isEmpty()) {
             sb.append("# Model has no texture vertices\n");
             return;
         }
 
         for (int i = 0; i < textureVertices.size(); i++) {
-            Vector2f textureVertex = textureVertices.get(i);
+            Vector2D textureVertex = textureVertices.get(i);
             //validateTextureVertex(textureVertex, i)
             sb.append("vt ")
                     .append(formatFloatCompact(textureVertex.getX())).append(" ")
@@ -90,11 +90,11 @@ public class ObjWriter {
 
     //Normals
     private static void writeNormals(Model model, StringBuilder sb) {
-        List<Vector3f> normals = model.getNormals();
+        List<Vector3D> normals = model.getNormals();
         if (normals == null || normals.isEmpty()) return;
 
         for (int i = 0; i < normals.size(); i++) {
-            Vector3f normal = normals.get(i);
+            Vector3D normal = normals.get(i);
             //validateNormal(normal, i)
             sb.append("vn ")
                     .append(formatFloatCompact(normal.getX())).append(" ")
