@@ -1,7 +1,7 @@
 package com.cgvsu.objtool.objreader;
 
-import com.cgvsu.math.Vector2f;
-import com.cgvsu.math.Vector3f;
+import com.cgvsu.math.LinearAlgebra.Vector2D;
+import com.cgvsu.math.LinearAlgebra.Vector3D;
 import com.cgvsu.model.Model;
 import com.cgvsu.model.Polygon;
 
@@ -51,28 +51,31 @@ public class ObjReader {
 			}
 		}
 
+		//System.out.println(result.getVertices());
 		return result;
 	}
 
 	// Всем методам кроме основного я поставил модификатор доступа protected, чтобы обращаться к ним в тестах
-	protected static Vector3f parseVertex(final ArrayList<String> wordsInLineWithoutToken, int lineInd) {
+	protected static Vector3D parseVertex(final ArrayList<String> wordsInLineWithoutToken, int lineInd) {
+		if (wordsInLineWithoutToken.size() > 3) {
+			throw new ObjReaderException("Too many vertex arguments.", lineInd);
+		}
+
 		try {
-			return new Vector3f(
+			return new Vector3D(
 					Float.parseFloat(wordsInLineWithoutToken.get(0)),
 					Float.parseFloat(wordsInLineWithoutToken.get(1)),
 					Float.parseFloat(wordsInLineWithoutToken.get(2)));
-
 		} catch(NumberFormatException e) {
 			throw new ObjReaderException("Failed to parse float value.", lineInd);
-
 		} catch(IndexOutOfBoundsException e) {
 			throw new ObjReaderException("Too few vertex arguments.", lineInd);
 		}
 	}
 
-	protected static Vector2f parseTextureVertex(final ArrayList<String> wordsInLineWithoutToken, int lineInd) {
+	protected static Vector2D parseTextureVertex(final ArrayList<String> wordsInLineWithoutToken, int lineInd) {
 		try {
-			return new Vector2f(
+			return new Vector2D(
 					Float.parseFloat(wordsInLineWithoutToken.get(0)),
 					Float.parseFloat(wordsInLineWithoutToken.get(1)));
 
@@ -84,9 +87,9 @@ public class ObjReader {
 		}
 	}
 
-	protected static Vector3f parseNormal(final ArrayList<String> wordsInLineWithoutToken, int lineInd) {
+	protected static Vector3D parseNormal(final ArrayList<String> wordsInLineWithoutToken, int lineInd) {
 		try {
-			return new Vector3f(
+			return new Vector3D(
 					Float.parseFloat(wordsInLineWithoutToken.get(0)),
 					Float.parseFloat(wordsInLineWithoutToken.get(1)),
 					Float.parseFloat(wordsInLineWithoutToken.get(2)));
