@@ -22,6 +22,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.canvas.Canvas?>
 
+<?import javafx.scene.control.ListView?>
 <BorderPane fx:id="rootPane" xmlns:fx="http://javafx.com/fxml" fx:controller="com.cgvsu.GuiController">
     <!-- ВЕРХНЯЯ ЧАСТЬ: Меню и Панель инструментов -->
     <top>
@@ -110,11 +111,8 @@
                             <!-- Секция: Модели -->
                             <TitledPane text="Модели" expanded="true">
                                 <VBox spacing="5">
-                                    <HBox spacing="5" alignment="CENTER_LEFT">
-                                        <Label text="Модель 1" />
-                                        <Region HBox.hgrow="ALWAYS"/>
-                                        <Button text="Удалить" style="-fx-font-size: 10px;"/>
-                                    </HBox>
+                                    <ListView fx:id="modelsListView" prefHeight="100.0" />
+                                    <Button text="Remove Model" maxWidth="Infinity" onAction="#onRemoveModelClick"/>
                                     <Button text="Загрузить текстуру" maxWidth="Infinity"/>
                                 </VBox>
                             </TitledPane>

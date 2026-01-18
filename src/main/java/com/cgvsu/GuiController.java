@@ -14,6 +14,8 @@ import com.cgvsu.render_engine.RenderEngine;
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.Scene;
@@ -21,6 +23,7 @@ import javafx.scene.canvas.Canvas;
 import javafx.scene.control.*;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.util.Duration;
@@ -59,6 +62,9 @@ public class GuiController {
     private ToggleButton sidebarToggle;
 
     @FXML
+    private ListView<String> modelsListView;
+
+    @FXML
     private TextField translateX, translateY, translateZ;
 
     @FXML
@@ -67,8 +73,13 @@ public class GuiController {
     @FXML
     private TextField scaleX, scaleY, scaleZ;
 
+    private ArrayList<Model> meshes = new ArrayList<>();
 
-    private Model mesh = null;
+    private ObservableList<String> modelNames = FXCollections.observableArrayList();
+
+    private Model selectedMesh = null;
+
+    private int modelCounter = 0;
 
     private Camera camera = new Camera(
             new Vector3D(0, 0, 100),
@@ -83,6 +94,20 @@ public class GuiController {
         // Это позволит ему меняться при движении разделителя SplitPane
         canvasPane.widthProperty().addListener((ov, oldValue, newValue) -> canvas.setWidth(newValue.doubleValue()));
         canvasPane.heightProperty().addListener((ov, oldValue, newValue) -> canvas.setHeight(newValue.doubleValue()));
+
+        modelsListView.setItems(modelNames);
+
+        //Слушатель выбора модели
+        modelsListView.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
+            int index = modelsListView.getSelectionModel().getSelectedIndex();
+            if (index >= 0 && index < meshes.size()) {
+                selectedMesh = meshes.get(index);
+                //При выборе модели обновляем поля трансформации ее значениями
+                updateTransformFields(selectedMesh);
+            } else {
+                selectedMesh = null;
+            }
+        });
 
         timeline = new Timeline();
         timeline.setCycleCount(Animation.INDEFINITE);
@@ -108,8 +133,8 @@ public class GuiController {
             canvas.getGraphicsContext2D().clearRect(0, 0, width, height);
             camera.setAspectRatio((float) (width / height));
 
-            if (mesh != null) {
-                RenderEngine.render(canvas.getGraphicsContext2D(), camera, mesh, (int) width, (int) height);
+            if (!meshes.isEmpty()) {
+                RenderEngine.render(canvas.getGraphicsContext2D(), camera, meshes, (int) width, (int) height);
             }
         });
 
@@ -134,6 +159,22 @@ public class GuiController {
         });
     }
 
+    private void updateTransformFields(Model model) {
+        AffineTransformer at = model.getAffineTransformer();
+
+        translateX.setText(String.valueOf(at.getTranslationX()));
+        translateY.setText(String.valueOf(at.getTranslationY()));
+        translateZ.setText(String.valueOf(at.getTranslationZ()));
+
+        rotateX.setText(String.valueOf(at.getRotationXDegrees()));
+        rotateY.setText(String.valueOf(at.getRotationYDegrees()));
+        rotateZ.setText(String.valueOf(at.getRotationZDegrees()));
+
+        scaleX.setText(String.valueOf(at.getScaleX()));
+        scaleY.setText(String.valueOf(at.getScaleY()));
+        scaleZ.setText(String.valueOf(at.getScaleZ()));
+    }
+
     @FXML
     private void toggleSidebar(ActionEvent event) {
         if (sidebarToggle.isSelected()) {
@@ -142,11 +183,11 @@ public class GuiController {
                 mainSplitPane.getItems().add(sidebar);
                 mainSplitPane.setDividerPositions(0.75);
             }
-            sidebarToggle.setText("Hide Panel");
+            sidebarToggle.setText("Скрыть панель");
         } else {
             // Кнопка не нажата
             mainSplitPane.getItems().remove(sidebar);
-            sidebarToggle.setText("Show Panel");
+            sidebarToggle.setText("Показать панель");
         }
     }
 
@@ -188,7 +229,13 @@ public class GuiController {
 
         try {
             String fileContent = Files.readString(fileName);
-            mesh = ObjReader.read(fileContent);
+            Model currMesh = ObjReader.read(fileContent);
+            meshes.add(currMesh);
+            String name = file.getName() + " (" + (++modelCounter) + ")";
+            modelNames.add(name);
+            // Выделяем новую модель автоматически
+            modelsListView.getSelectionModel().selectLast();
+
             DialogUtils.showInfo("Success!", "The model was successfully uploaded from the file:\n"
                     + file.getName());
         } catch (ObjReaderException e) {
@@ -202,118 +249,95 @@ public class GuiController {
     }
 
     @FXML
+    private void onRemoveModelClick() {
+        int index = modelsListView.getSelectionModel().getSelectedIndex();
+        if (index >= 0 && index < meshes.size()) {
+            meshes.remove(index);
+            modelNames.remove(index);
+
+            if (meshes.isEmpty()) {
+                selectedMesh = null;
+            } else {
+                modelsListView.getSelectionModel().selectLast();
+            }
+        }
+    }
+
+    @FXML
     private void onSaveModelMenuItemClick() {
-        if (mesh == null) {
+        if (selectedMesh == null) {
             DialogUtils.showError("Saving error", "Upload the model first!");
             return;
         }
 
-        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-        alert.setTitle("Сохранение модели");
-        alert.setHeaderText(null);
-        alert.setContentText("Вы хотите сохранить исходную модель или применить" +
-                "текущие преобразования (поворот, масштаб, положение)?");
+        Dialog<ButtonType> dialog = new Dialog<>();
+        dialog.setTitle("Save Model");
+        dialog.setHeaderText("Export Settings");
 
         if (rootPane.getScene() != null && !rootPane.getScene().getStylesheets().isEmpty()) {
-            alert.getDialogPane().getStylesheets().add(rootPane.getScene().getStylesheets().get(0));
+            dialog.getDialogPane().getStylesheets().add(rootPane.getScene().getStylesheets().get(0));
         }
 
-        ButtonType buttonTypeOriginal = new ButtonType("Сохранить оригинал");
-        ButtonType buttonTypeTransformed = new ButtonType("Сохранить изменённую");
-        ButtonType buttonTypeCancel = new ButtonType("Отмена", ButtonBar.ButtonData.CANCEL_CLOSE);
+        Label label = new Label("Select save mode:");
+        ComboBox<String> modeComboBox = new ComboBox<>();
+        modeComboBox.getItems().addAll("Original Model", "Transformed Model");
+        modeComboBox.getSelectionModel().selectFirst();
 
-        alert.getButtonTypes().setAll(buttonTypeOriginal, buttonTypeTransformed, buttonTypeCancel);
+        VBox content = new VBox(10);
+        content.getChildren().addAll(label, modeComboBox);
+        dialog.getDialogPane().setContent(content);
+
+        // --- Создаем кнопки (ТОЛЬКО SAVE и CANCEL) ---
+        ButtonType saveButtonType = new ButtonType("Save", ButtonBar.ButtonData.OK_DONE);
+        ButtonType cancelButtonType = new ButtonType("Cancel", ButtonBar.ButtonData.CANCEL_CLOSE);
+
+        dialog.getDialogPane().getButtonTypes().setAll(saveButtonType, cancelButtonType);
 
         //Ждем выбора пользователя
-        Optional<ButtonType> result = alert.showAndWait();
+        Optional<ButtonType> result = dialog.showAndWait();
 
-        // Если нажали Cancel или закрыли окно - выходим
-        if (result.isEmpty() || result.get() == buttonTypeCancel) {
-            return;
-        }
+        if (result.isPresent() && result.get() == saveButtonType) {
+            boolean saveTransformed = modeComboBox.getValue().equals("Transformed Model");
 
-        FileChooser fileChooser = new FileChooser();
-        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Model (*.obj)", "*.obj"));
-        fileChooser.setTitle("Save Model");
-        String defaultName = (result.get() == buttonTypeTransformed) ? "model_transformed.obj" : "model_original.obj";
-        fileChooser.setInitialFileName(defaultName);
+            FileChooser fileChooser = new FileChooser();
+            fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Model (*.obj)", "*.obj"));
+            fileChooser.setTitle("Save Model");
 
-        File file = fileChooser.showSaveDialog((Stage) canvas.getScene().getWindow());
-        if (file == null) {
-            return; //Когда пользователь нажал отмена
-        }
+            // Имя файла зависит от выбора в ComboBox
+            String defaultName = saveTransformed ? "model_transformed.obj" : "model_original.obj";
+            fileChooser.setInitialFileName(defaultName);
 
-        try {
-            if (result.get() == buttonTypeOriginal) {
-                //Сохраняем как есть (просто передаем текущий mesh)
-                ObjWriter.writeObjToFile(mesh, file.getAbsolutePath());
-                DialogUtils.showInfo("Успешно!", "Оригинальная модель успешно сохранена.");
-            } else {
-                //Сохраняем с трансформациями (создаем новую версию и пишем её)
-                saveTransformedModel(mesh, file.getAbsolutePath());
-                DialogUtils.showInfo("Успешно!", "Изменённая модель успешно сохранена.");
+            File file = fileChooser.showSaveDialog((Stage) canvas.getScene().getWindow());
+            if (file == null) {
+                return;
             }
-        } catch (Exception e) {
-            DialogUtils.showError("Error", "Failed to save model: " + e.getMessage());
-            e.printStackTrace();
+
+            try {
+                if (saveTransformed) {
+                    // Сохраняем трансформированную
+                    saveTransformedModel(selectedMesh, file.getAbsolutePath());
+                    DialogUtils.showInfo("Success", "Transformed model saved successfully.");
+                } else {
+                    // Сохраняем оригинал
+                    ObjWriter.writeObjToFile(selectedMesh, file.getAbsolutePath());
+                    DialogUtils.showInfo("Success", "Original model saved successfully.");
+                }
+            } catch (Exception e) {
+                DialogUtils.showError("Error", "Failed to save model: " + e.getMessage());
+                e.printStackTrace();
+            }
         }
     }
 
-    //НАДО ПЕРЕНЕСТИ ЭТО НЕ ДЛЯ ГРАФИЧЕСКОГО ИНТЕРФЕЙСА
-    // Метод для создания временной копии модели с примененными трансформациями
     private void saveTransformedModel(Model originalMesh, String filePath) throws IOException {
-        //Получаем текущую матрицу трансформации из модели
-        Matrix4x4 modelMatrix = originalMesh.getAffineTransformer().getModelMatrix();
-
-        //Создаем временную модель
-        Model tempMesh = new Model();
-
-        // Копируем данные, которые не меняются (полигоны и текстурные координаты)
-        tempMesh.setPolygons(originalMesh.getPolygons());
-        tempMesh.setTextureVertices(originalMesh.getTextureVertices());
-
-        //Пересчитываем вершины
-        ArrayList<Vector3D> newVertices = new ArrayList<>();
-        for (Vector3D v : originalMesh.getVertices()) {
-            //Конвертируем в Vector3D для математики
-            Vector3D v3d = new Vector3D(v.getX(), v.getY(), v.getZ());
-
-            //Умножаем вершину на матрицу (M * v)
-            Vector3D transformedV = modelMatrix.multiplyByVector(v3d);
-
-            //Сохраняем результат
-            newVertices.add(new Vector3D(transformedV.getX(), transformedV.getY(), transformedV.getZ()));
-        }
-        tempMesh.setVertices(newVertices);
-
-        //Пересчитываем нормали, если они есть
-        //Для правильного поворота нормалей нужна "Обратная Транспонированная" матрица
-        if (!originalMesh.getNormals().isEmpty()) {
-            ArrayList<Vector3D> newNormals = new ArrayList<>();
-
-            //Получаем матрицу для нормалей: (M^-1)^T
-            //Берем 3x3 часть (вращение и масштаб), инвертируем и транспонируем
-            var normalMatrix = modelMatrix.toMatrix3x3().inverse().transpose();
-
-            for (Vector3D n : originalMesh.getNormals()) {
-                Vector3D n3d = new Vector3D(n.getX(), n.getY(), n.getZ());
-
-                //Умножаем и обязательно нормализуем
-                Vector3D transformedN = normalMatrix.multiplyByVector(n3d).normalization();
-
-                newNormals.add(new Vector3D(transformedN.getX(), transformedN.getY(), transformedN.getZ()));
-            }
-            tempMesh.setNormals(newNormals);
-        }
-
-        //Отдаем эту временную модель ObjWriter
-        ObjWriter.writeObjToFile(tempMesh, filePath);
+        Model transformedMesh = originalMesh.applyModelTransformationForSafeForOBJWriter();
+        ObjWriter.writeObjToFile(transformedMesh, filePath);
     }
 
     @FXML
     private void onRenderButtonClick() {
         // Если модели нет, выходим
-        if (mesh == null) {
+        if (selectedMesh == null) {
             DialogUtils.showError("Error", "Load the model first!");
             return;
         }
@@ -332,7 +356,7 @@ public class GuiController {
             float sy = Float.parseFloat(scaleY.getText());
             float sz = Float.parseFloat(scaleZ.getText());
 
-            mesh.getAffineTransformer().changeModelMatrixForDegree(
+            selectedMesh.getAffineTransformer().changeModelMatrixForDegree(
                     sx, sy, sz,
                     rx, ry, rz,
                     tx, ty, tz
