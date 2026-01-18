@@ -287,7 +287,7 @@ public class GuiController {
         content.getChildren().addAll(label, modeComboBox);
         dialog.getDialogPane().setContent(content);
 
-        // --- Создаем кнопки (ТОЛЬКО SAVE и CANCEL) ---
+        //Создаем кнопки (ТОЛЬКО SAVE и CANCEL)
         ButtonType saveButtonType = new ButtonType("Сохранить", ButtonBar.ButtonData.OK_DONE);
         ButtonType cancelButtonType = new ButtonType("Отмена", ButtonBar.ButtonData.CANCEL_CLOSE);
 
@@ -335,10 +335,10 @@ public class GuiController {
     }
 
     @FXML
-    private void onRenderButtonClick() {
+    private void onApplyTransformClick() {
         // Если модели нет, выходим
         if (selectedMesh == null) {
-            DialogUtils.showError("Ошибка!", "Сначала загрузите модель!");
+            DialogUtils.showError("Ошибка!", "Сначала выберите модель из списка!");
             return;
         }
 
@@ -347,7 +347,7 @@ public class GuiController {
             float ty = Float.parseFloat(translateY.getText());
             float tz = Float.parseFloat(translateZ.getText());
 
-            //Полагаем, что ввод в градусах
+            // Полагаем, что ввод в градусах
             float rx = Float.parseFloat(rotateX.getText());
             float ry = Float.parseFloat(rotateY.getText());
             float rz = Float.parseFloat(rotateZ.getText());
@@ -363,10 +363,43 @@ public class GuiController {
             );
 
         } catch (NumberFormatException e) {
-            DialogUtils.showError("Ошибка ввода", "Пожалуйста, введите числа в поля для преобразования.");
+            DialogUtils.showError("Ошибка ввода", "Пожалуйста, введите корректные числа.");
         } catch (Exception e) {
-            DialogUtils.showError("Ошибка", "Во время настройки рендеринга произошла непредвиденная ошибка.");
+            DialogUtils.showError("Ошибка", "Не удалось применить трансформацию: " + e.getMessage());
         }
+    }
+
+    @FXML
+    private void onRenderButtonClick() {
+        // Пока функционал снят, можно вывести сообщение или просто оставить пустым
+    }
+
+    @FXML
+    private void onShowHelpMenuItemClick() {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Справка");
+        alert.setHeaderText("Управление и горячие клавиши");
+
+        // Текст справки (потом поменяешь на свой)
+        alert.setContentText(
+                "Управление камерой:\n" +
+                        "• W / S - Движение вперед / назад\n" +
+                        "• A / D - Движение влево / вправо\n" +
+                        "• UP / DOWN - Движение вверх / вниз\n\n" +
+                        "Работа с файлами:\n" +
+                        "• Ctrl + F - Загрузить модель\n" +
+                        "• Ctrl + S - Сохранить текущую модель\n\n" +
+                        "Интерфейс:\n" +
+                        "• Выберите модель в списке справа, чтобы редактировать её.\n" +
+                        "• Нажмите 'Рендер' для применения трансформаций."
+        );
+
+        // Применяем текущую CSS тему (Темную или Светлую), чтобы окно не было белым пятном
+        if (rootPane.getScene() != null && !rootPane.getScene().getStylesheets().isEmpty()) {
+            alert.getDialogPane().getStylesheets().add(rootPane.getScene().getStylesheets().get(0));
+        }
+
+        alert.showAndWait();
     }
 
 

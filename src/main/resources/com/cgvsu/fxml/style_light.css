@@ -35,9 +35,10 @@
 .accent-button {
     -fx-background-color: #4CAF50; /* ЗЕЛЕНЫЙ сразу, а не только при нажатии */
     -fx-text-fill: white;
-    -fx-background-radius: 20;     /* Круглые края */
+    -fx-background-radius: 5;
+    -fx-border-radius: 5;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.15), 3, 0, 0, 1);
     -fx-border-color: #4CAF50;
-    -fx-border-radius: 20;
     -fx-cursor: hand;
     -fx-padding: 5 15 5 15;
 }
