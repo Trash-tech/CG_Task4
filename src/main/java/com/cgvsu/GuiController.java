@@ -21,6 +21,7 @@ import javafx.fxml.FXML;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.control.*;
+import javafx.scene.input.MouseButton;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
@@ -81,6 +82,10 @@ public class GuiController {
 
     private int modelCounter = 0;
 
+    private double mousePrevX = 0;
+    private double mousePrevY = 0;
+    private boolean isMousePressed = false;
+
     private Camera camera = new Camera(
             new Vector3D(0, 0, 100),
             new Vector3D(0, 0, 0),
@@ -97,12 +102,14 @@ public class GuiController {
 
         modelsListView.setItems(modelNames);
 
-        //Слушатель выбора модели
+        setupMouseControls();
+        setupGlobalEventListeners();
+
+        //Выбор модели
         modelsListView.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
             int index = modelsListView.getSelectionModel().getSelectedIndex();
             if (index >= 0 && index < meshes.size()) {
                 selectedMesh = meshes.get(index);
-                //При выборе модели обновляем поля трансформации ее значениями
                 updateTransformFields(selectedMesh);
             } else {
                 selectedMesh = null;
@@ -147,13 +154,13 @@ public class GuiController {
 
             // Проверяем состояние кнопки при запуске
             if (sidebarToggle.isSelected()) {
-                sidebarToggle.setText("Скрыть панель"); // Если нажата - "Скрыть"
+                sidebarToggle.setText("Скрыть панель"); // Если нажата, скрыть
                 if (!mainSplitPane.getItems().contains(sidebar)) {
                     mainSplitPane.getItems().add(sidebar);
                     mainSplitPane.setDividerPositions(0.75);
                 }
             } else {
-                sidebarToggle.setText("Показать панель"); // Если отжата - "Показать"
+                sidebarToggle.setText("Показать панель"); // Если отжата, показать
                 mainSplitPane.getItems().remove(sidebar);
             }
         });
@@ -178,14 +185,12 @@ public class GuiController {
     @FXML
     private void toggleSidebar(ActionEvent event) {
         if (sidebarToggle.isSelected()) {
-            // Кнопка нажата
             if (!mainSplitPane.getItems().contains(sidebar)) {
                 mainSplitPane.getItems().add(sidebar);
                 mainSplitPane.setDividerPositions(0.75);
             }
             sidebarToggle.setText("Скрыть панель");
         } else {
-            // Кнопка не нажата
             mainSplitPane.getItems().remove(sidebar);
             sidebarToggle.setText("Показать панель");
         }
@@ -287,7 +292,6 @@ public class GuiController {
         content.getChildren().addAll(label, modeComboBox);
         dialog.getDialogPane().setContent(content);
 
-        //Создаем кнопки (ТОЛЬКО SAVE и CANCEL)
         ButtonType saveButtonType = new ButtonType("Сохранить", ButtonBar.ButtonData.OK_DONE);
         ButtonType cancelButtonType = new ButtonType("Отмена", ButtonBar.ButtonData.CANCEL_CLOSE);
 
@@ -303,7 +307,7 @@ public class GuiController {
             fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Model (*.obj)", "*.obj"));
             fileChooser.setTitle("Сохранение модели");
 
-            // Имя файла зависит от выбора в ComboBox
+            // Имя файла зависит от выбора
             String defaultName = saveTransformed ? "model_transformed.obj" : "model_original.obj";
             fileChooser.setInitialFileName(defaultName);
 
@@ -314,11 +318,9 @@ public class GuiController {
 
             try {
                 if (saveTransformed) {
-                    // Сохраняем трансформированную
                     saveTransformedModel(selectedMesh, file.getAbsolutePath());
                     DialogUtils.showInfo("Успешно!", "Преобразованная модель успешно сохранена.");
                 } else {
-                    // Сохраняем оригинал
                     ObjWriter.writeObjToFile(selectedMesh, file.getAbsolutePath());
                     DialogUtils.showInfo("Успешно!", "Исходная модель успешно сохранена.");
                 }
@@ -336,7 +338,6 @@ public class GuiController {
 
     @FXML
     private void onApplyTransformClick() {
-        // Если модели нет, выходим
         if (selectedMesh == null) {
             DialogUtils.showError("Ошибка!", "Сначала выберите модель из списка!");
             return;
@@ -370,31 +371,23 @@ public class GuiController {
     }
 
     @FXML
-    private void onRenderButtonClick() {
-        // Пока функционал снят, можно вывести сообщение или просто оставить пустым
-    }
-
-    @FXML
     private void onShowHelpMenuItemClick() {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle("Справка");
         alert.setHeaderText("Управление и горячие клавиши");
-
-        // Текст справки (потом поменяешь на свой)
         alert.setContentText(
                 "Управление камерой:\n" +
                         "• W / S - Движение вперед / назад\n" +
                         "• A / D - Движение влево / вправо\n" +
-                        "• UP / DOWN - Движение вверх / вниз\n\n" +
+                        "• E / Q (SPACE / SHIFT) - Движение вверх / вниз\n\n" +
                         "Работа с файлами:\n" +
                         "• Ctrl + F - Загрузить модель\n" +
                         "• Ctrl + S - Сохранить текущую модель\n\n" +
                         "Интерфейс:\n" +
-                        "• Выберите модель в списке справа, чтобы редактировать её.\n" +
-                        "• Нажмите 'Рендер' для применения трансформаций."
+                        "• Выберите модель в списке справа, чтобы редактировать её.\n"
         );
 
-        // Применяем текущую CSS тему (Темную или Светлую), чтобы окно не было белым пятном
+        // Применяем текущую CSS тему
         if (rootPane.getScene() != null && !rootPane.getScene().getStylesheets().isEmpty()) {
             alert.getDialogPane().getStylesheets().add(rootPane.getScene().getStylesheets().get(0));
         }
@@ -402,11 +395,133 @@ public class GuiController {
         alert.showAndWait();
     }
 
+    private void setupGlobalEventListeners() {
+        // Делаем так, чтобы canvas мог получать фокус клавиатуры
+        canvas.setFocusTraversable(true);
 
-    @FXML public void handleCameraForward(ActionEvent actionEvent) { camera.movePosition(new Vector3D(0, 0, -TRANSLATION)); }
-    @FXML public void handleCameraBackward(ActionEvent actionEvent) { camera.movePosition(new Vector3D(0, 0, TRANSLATION)); }
-    @FXML public void handleCameraLeft(ActionEvent actionEvent) { camera.movePosition(new Vector3D(TRANSLATION, 0, 0)); }
-    @FXML public void handleCameraRight(ActionEvent actionEvent) { camera.movePosition(new Vector3D(-TRANSLATION, 0, 0)); }
-    @FXML public void handleCameraUp(ActionEvent actionEvent) { camera.movePosition(new Vector3D(0, TRANSLATION, 0)); }
-    @FXML public void handleCameraDown(ActionEvent actionEvent) { camera.movePosition(new Vector3D(0, -TRANSLATION, 0)); }
+        // При клике на canvas забираем фокус (чтобы перестать печатать в текстовых полях)
+        canvas.setOnMouseClicked(e -> canvas.requestFocus());
+
+        canvas.setOnKeyPressed(event -> {
+            switch (event.getCode()) {
+                case W:
+                    handleCameraForward(null);
+                    break;
+                case S:
+                    handleCameraBackward(null);
+                    break;
+                case A:
+                    handleCameraLeft(null);
+                    break;
+                case D:
+                    handleCameraRight(null);
+                    break;
+                case E:
+                    handleCameraUp(null);
+                    break;
+                case Q:
+                    handleCameraDown(null);
+                    break;
+                case SPACE:
+                    handleCameraUp(null);
+                    break;
+                case SHIFT:
+                    handleCameraDown(null);
+                    break;
+            }
+        });
+    }
+
+    private void setupMouseControls() {
+        //При нажатие кнопки мыши запоминаем начальные координаты
+        canvas.setOnMousePressed(e -> {
+            if (e.getButton() == MouseButton.PRIMARY) {
+                isMousePressed = true;
+                mousePrevX = e.getSceneX();
+                mousePrevY = e.getSceneY();
+            }
+        });
+
+        canvas.setOnMouseReleased(e -> {
+            if (e.getButton() == MouseButton.PRIMARY) {
+                isMousePressed = false;
+            }
+        });
+
+        //Когда двигаем мышь с зажатой кнопкой мы вращаем камеру
+        canvas.setOnMouseDragged(e -> {
+            if (isMousePressed) {
+                double deltaX = e.getSceneX() - mousePrevX;
+                double deltaY = e.getSceneY() - mousePrevY;
+
+                camera.rotateAroundTarget((float) deltaX, (float) deltaY);
+
+                mousePrevX = e.getSceneX();
+                mousePrevY = e.getSceneY();
+            }
+        });
+
+        canvas.setOnScroll(e -> {
+            double delta = e.getDeltaY();
+            float zoomSpeed = 2.0f; // Скорость зума
+
+            // Вектор направления взгляда
+            Vector3D forward = camera.getTarget().subtract(camera.getPosition()).normalization();
+
+            if (delta > 0) {
+                camera.movePositionWithTarget(forward.multiplyByScalar(zoomSpeed));
+            } else {
+                camera.movePositionWithTarget(forward.multiplyByScalar(-zoomSpeed));
+            }
+        });
+    }
+
+    @FXML
+    public void handleCameraForward(ActionEvent actionEvent) {
+        Vector3D forward = camera.getTarget().subtract(camera.getPosition()).normalization();
+        camera.movePositionWithTarget(forward.multiplyByScalar(TRANSLATION));
+    }
+
+    @FXML
+    public void handleCameraBackward(ActionEvent actionEvent) {
+        Vector3D backward = camera.getPosition().subtract(camera.getTarget()).normalization();
+        camera.movePositionWithTarget(backward.multiplyByScalar(TRANSLATION));
+    }
+
+    @FXML
+    public void handleCameraLeft(ActionEvent actionEvent) {
+        Vector3D forward = camera.getTarget().subtract(camera.getPosition()).normalization();
+        Vector3D up = new Vector3D(0, 1, 0);
+        Vector3D right = forward.crossProduct(up).normalization();
+
+        camera.movePositionWithTarget(right.multiplyByScalar(TRANSLATION));
+    }
+
+    @FXML
+    public void handleCameraRight(ActionEvent actionEvent) {
+        Vector3D forward = camera.getTarget().subtract(camera.getPosition()).normalization();
+        Vector3D up = new Vector3D(0, 1, 0);
+        Vector3D left = up.crossProduct(forward).normalization();
+
+        camera.movePositionWithTarget(left.multiplyByScalar(TRANSLATION));
+    }
+
+    @FXML
+    public void handleCameraUp(ActionEvent actionEvent) {
+        camera.movePositionWithTarget(new Vector3D(0, TRANSLATION, 0));
+    }
+
+    @FXML
+    public void handleCameraDown(ActionEvent actionEvent) {
+        camera.movePositionWithTarget(new Vector3D(0, -TRANSLATION, 0));
+    }
+
+    @FXML
+    public void onResetCameraClick() {
+        camera = new Camera(
+                new Vector3D(0, 0, 100),
+                new Vector3D(0, 0, 0),
+                1.0F, 1, 0.01F, 100
+        );
+    }
 }

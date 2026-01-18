@@ -1,5 +1,5 @@
 .root {
-    -fx-base: #f4f4f4; /* Светлый фон (стандартный для окон) */
+    -fx-base: #f4f4f4;
     -fx-control-inner-background: #ffffff;
     -fx-background-color: #f4f4f4;
 }
@@ -10,7 +10,7 @@
     -fx-background-radius: 5;
     -fx-padding: 5 15 5 15;
     -fx-cursor: hand;
-    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.15), 3, 0, 0, 1); /* Тень мягче чем в темной */
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.15), 3, 0, 0, 1);
 }
 
 .button:hover {
@@ -24,16 +24,16 @@
 
 /* Меню бар */
 .menu-bar {
-    -fx-background-color: #d6d6d6; /* Темнее фона окна, чтобы отделить шапку */
+    -fx-background-color: #d6d6d6;
     -fx-padding: 2 5 2 5;
-    -fx-border-color: #bbbbbb; /* Линия разделителя снизу */
+    -fx-border-color: #bbbbbb;
     -fx-border-width: 0 0 1 0;
 }
 
-/* Стиль для особых кнопок (Рендер, Показать панель) */
+/* Стиль для особых кнопок (Показать панель, сменить тему) */
 /* Стилизация Тумблера (Общий стиль для всех) */
 .accent-button {
-    -fx-background-color: #4CAF50; /* ЗЕЛЕНЫЙ сразу, а не только при нажатии */
+    -fx-background-color: #4CAF50;
     -fx-text-fill: white;
     -fx-background-radius: 5;
     -fx-border-radius: 5;
@@ -50,9 +50,9 @@
     -fx-text-fill: white;
 }
 
-/* Сами кнопки меню (File, Camera Options) */
+/* Сами кнопки меню (Файл, справка) */
 .menu-bar .menu-button {
-    -fx-background-color: transparent; /* Прозрачный фон по умолчанию */
+    -fx-background-color: transparent;
     -fx-background-radius: 4;
     -fx-padding: 4 8 4 8;
 }
@@ -63,10 +63,10 @@
     -fx-font-size: 12px;
 }
 
-/* Эффект при наведении (Hover) - Серый, не синий */
+/* Эффект при наведении */
 .menu-bar .menu-button:hover,
 .menu-bar .menu-button:showing {
-    -fx-background-color: #bfbfbf; /* Темно-серый при наведении */
+    -fx-background-color: #bfbfbf;
     -fx-cursor: hand;
 }
 
@@ -78,23 +78,23 @@
 
 /* Выпадающее меню */
 .context-menu {
-    -fx-background-color: #ffffff; /* Белый фон */
+    -fx-background-color: #ffffff;
     -fx-border-color: #cccccc;
     -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.2), 5, 0, 0, 3);
 }
 
 .menu-item:focused {
-    -fx-background-color: #e6f3ff; /* Светло-голубой акцент */
+    -fx-background-color: #e6f3ff;
     -fx-text-fill: #000000;
 }
 
 /* Текстовые поля ввода */
 .text-field {
-    -fx-background-color: #ffffff;  /* Белый фон для ввода */
+    -fx-background-color: #ffffff;
     -fx-text-fill: #333333;
     -fx-prompt-text-fill: #888888;
     -fx-background-radius: 4;
-    -fx-border-color: #bbbbbb;      /* Серая рамка */
+    -fx-border-color: #bbbbbb;
     -fx-border-radius: 4;
 }
 
@@ -105,7 +105,7 @@
     -fx-background-color: transparent;
 }
 
-/* Разделители SplitPane (если используются) */
+/* Разделители SplitPane */
 .split-pane:horizontal > .split-pane-divider {
     -fx-background-color: #d6d6d6;
     -fx-border-color: transparent;
@@ -128,11 +128,11 @@
 
 /* Цвет текста */
 .dialog-pane .label {
-    -fx-text-fill: #333333; /* Темный текст для читаемости на светлом */
+    -fx-text-fill: #333333;
     -fx-font-size: 14px;
 }
 
-/* Кнопка OK/Cancel внутри диалога */
+/* Кнопка Ок, отмена внутри диалога */
 .dialog-pane .button {
     -fx-background-color: #e0e0e0;
     -fx-text-fill: #333333;
