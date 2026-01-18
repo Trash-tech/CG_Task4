@@ -3,6 +3,7 @@ package com.cgvsu.model;
 import com.cgvsu.math.AffineTransformer;
 import com.cgvsu.math.LinearAlgebra.Vector2D;
 import com.cgvsu.math.LinearAlgebra.Vector3D;
+import com.cgvsu.objtool.objwriter.ObjWriter;
 
 import java.util.ArrayList;
 
@@ -57,6 +58,7 @@ public class Model {
         model.setTextureVertices(textureVertices);
         return model;
     }
+
 
     public static ArrayList<Vector3D> cloneArrayList(ArrayList<Vector3D> a){
         ArrayList<Vector3D> result = new ArrayList<>();

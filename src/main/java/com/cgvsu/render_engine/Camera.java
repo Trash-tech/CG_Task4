@@ -41,11 +41,11 @@ public class Camera {
     }
 
     public void movePosition(final Vector3D translation) {
-        this.position.sum(translation);
+        this.position = this.position.sum(translation);
     }
 
     public void moveTarget(final Vector3D translation) {
-        this.target.sum(target);
+        this.target = this.target.sum(translation);
     }
 
     Matrix4x4 getViewMatrix() {
