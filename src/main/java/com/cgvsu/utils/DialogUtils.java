@@ -37,7 +37,7 @@ public class DialogUtils {
             dialogPane.getStylesheets().clear();
             dialogPane.getStylesheets().add(currentStyleSheet);
 
-            // Хак, чтобы иконки и цвета шрифтов обновились корректно
+            // Чтобы иконки и цвета шрифтов обновились корректно
             dialogPane.getStyleClass().add("my-dialog");
         }
     }

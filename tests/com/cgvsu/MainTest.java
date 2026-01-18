@@ -1,4 +1,4 @@
-package ru.vsu.fkn.isit.cg;
+package com.cgvsu;
 
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;

@@ -1,5 +1,7 @@
 package com.cgvsu;
 
+import com.cgvsu.math.AffineTransformer;
+import com.cgvsu.math.LinearAlgebra.Matrix4x4;
 import com.cgvsu.math.LinearAlgebra.Vector3D;
 import com.cgvsu.model.Model;
 import com.cgvsu.objtool.objreader.ObjReader;
@@ -16,19 +18,20 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
-import javafx.scene.control.SplitPane;
-import javafx.scene.control.ToggleButton;
+import javafx.scene.control.*;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
-import javax.vecmath.Vector3f;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Optional;
 
 public class GuiController {
 
@@ -55,6 +58,16 @@ public class GuiController {
     @FXML
     private ToggleButton sidebarToggle;
 
+    @FXML
+    private TextField translateX, translateY, translateZ;
+
+    @FXML
+    private TextField rotateX, rotateY, rotateZ;
+
+    @FXML
+    private TextField scaleX, scaleY, scaleZ;
+
+
     private Model mesh = null;
 
     private Camera camera = new Camera(
@@ -74,6 +87,20 @@ public class GuiController {
         timeline = new Timeline();
         timeline.setCycleCount(Animation.INDEFINITE);
 
+        AffineTransformer defaultTransformer = new AffineTransformer();
+
+        scaleX.setText(String.valueOf(defaultTransformer.getScaleX()));
+        scaleY.setText(String.valueOf(defaultTransformer.getScaleY()));
+        scaleZ.setText(String.valueOf(defaultTransformer.getScaleZ()));
+
+        rotateX.setText(String.valueOf(defaultTransformer.getRotationXDegrees()));
+        rotateY.setText(String.valueOf(defaultTransformer.getRotationYDegrees()));
+        rotateZ.setText(String.valueOf(defaultTransformer.getRotationZDegrees()));
+
+        translateX.setText(String.valueOf(defaultTransformer.getTranslationX()));
+        translateY.setText(String.valueOf(defaultTransformer.getTranslationY()));
+        translateZ.setText(String.valueOf(defaultTransformer.getTranslationZ()));
+
         KeyFrame frame = new KeyFrame(Duration.millis(15), event -> {
             double width = canvas.getWidth();
             double height = canvas.getHeight();
@@ -91,8 +118,17 @@ public class GuiController {
 
         // Начальная инициализация стилей
         javafx.application.Platform.runLater(() -> {
-            toggleTheme(false);
-            if (!sidebarToggle.isSelected()) {
+            toggleTheme(false); // Запускаем светлую тему
+
+            // Проверяем состояние кнопки при запуске
+            if (sidebarToggle.isSelected()) {
+                sidebarToggle.setText("Скрыть панель"); // Если нажата - "Скрыть"
+                if (!mainSplitPane.getItems().contains(sidebar)) {
+                    mainSplitPane.getItems().add(sidebar);
+                    mainSplitPane.setDividerPositions(0.75);
+                }
+            } else {
+                sidebarToggle.setText("Показать панель"); // Если отжата - "Показать"
                 mainSplitPane.getItems().remove(sidebar);
             }
         });
@@ -101,14 +137,16 @@ public class GuiController {
     @FXML
     private void toggleSidebar(ActionEvent event) {
         if (sidebarToggle.isSelected()) {
-            // Показать панель
+            // Кнопка нажата
             if (!mainSplitPane.getItems().contains(sidebar)) {
                 mainSplitPane.getItems().add(sidebar);
-                mainSplitPane.setDividerPositions(0.75); // 75% места для канваса
+                mainSplitPane.setDividerPositions(0.75);
             }
+            sidebarToggle.setText("Hide Panel");
         } else {
-            // Скрыть панель
+            // Кнопка не нажата
             mainSplitPane.getItems().remove(sidebar);
+            sidebarToggle.setText("Show Panel");
         }
     }
 
@@ -170,10 +208,35 @@ public class GuiController {
             return;
         }
 
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle("Сохранение модели");
+        alert.setHeaderText(null);
+        alert.setContentText("Вы хотите сохранить исходную модель или применить" +
+                "текущие преобразования (поворот, масштаб, положение)?");
+
+        if (rootPane.getScene() != null && !rootPane.getScene().getStylesheets().isEmpty()) {
+            alert.getDialogPane().getStylesheets().add(rootPane.getScene().getStylesheets().get(0));
+        }
+
+        ButtonType buttonTypeOriginal = new ButtonType("Сохранить оригинал");
+        ButtonType buttonTypeTransformed = new ButtonType("Сохранить изменённую");
+        ButtonType buttonTypeCancel = new ButtonType("Отмена", ButtonBar.ButtonData.CANCEL_CLOSE);
+
+        alert.getButtonTypes().setAll(buttonTypeOriginal, buttonTypeTransformed, buttonTypeCancel);
+
+        //Ждем выбора пользователя
+        Optional<ButtonType> result = alert.showAndWait();
+
+        // Если нажали Cancel или закрыли окно - выходим
+        if (result.isEmpty() || result.get() == buttonTypeCancel) {
+            return;
+        }
+
         FileChooser fileChooser = new FileChooser();
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Model (*.obj)", "*.obj"));
         fileChooser.setTitle("Save Model");
-        fileChooser.setInitialFileName("model_saved.obj");
+        String defaultName = (result.get() == buttonTypeTransformed) ? "model_transformed.obj" : "model_original.obj";
+        fileChooser.setInitialFileName(defaultName);
 
         File file = fileChooser.showSaveDialog((Stage) canvas.getScene().getWindow());
         if (file == null) {
@@ -181,17 +244,107 @@ public class GuiController {
         }
 
         try {
-            ObjWriter.writeObjToFile(mesh, file.getAbsolutePath());
-            DialogUtils.showInfo("Success!", "The model has been successfully saved to a file:\n"
-                    + file.getName());
-        } catch (ObjWriterException e) {
-            DialogUtils.showError("Model recording error", e.getMessage());
-        } catch (IOException e) {
-            DialogUtils.showError("File access error", "Couldn't save the file: " + e.getMessage());
+            if (result.get() == buttonTypeOriginal) {
+                //Сохраняем как есть (просто передаем текущий mesh)
+                ObjWriter.writeObjToFile(mesh, file.getAbsolutePath());
+                DialogUtils.showInfo("Успешно!", "Оригинальная модель успешно сохранена.");
+            } else {
+                //Сохраняем с трансформациями (создаем новую версию и пишем её)
+                saveTransformedModel(mesh, file.getAbsolutePath());
+                DialogUtils.showInfo("Успешно!", "Изменённая модель успешно сохранена.");
+            }
         } catch (Exception e) {
-            DialogUtils.showError("Unknow error", e.getMessage());
+            DialogUtils.showError("Error", "Failed to save model: " + e.getMessage());
+            e.printStackTrace();
         }
     }
+
+    //НАДО ПЕРЕНЕСТИ ЭТО НЕ ДЛЯ ГРАФИЧЕСКОГО ИНТЕРФЕЙСА
+    // Метод для создания временной копии модели с примененными трансформациями
+    private void saveTransformedModel(Model originalMesh, String filePath) throws IOException {
+        //Получаем текущую матрицу трансформации из модели
+        Matrix4x4 modelMatrix = originalMesh.getAffineTransformer().getModelMatrix();
+
+        //Создаем временную модель
+        Model tempMesh = new Model();
+
+        // Копируем данные, которые не меняются (полигоны и текстурные координаты)
+        tempMesh.setPolygons(originalMesh.getPolygons());
+        tempMesh.setTextureVertices(originalMesh.getTextureVertices());
+
+        //Пересчитываем вершины
+        ArrayList<Vector3D> newVertices = new ArrayList<>();
+        for (Vector3D v : originalMesh.getVertices()) {
+            //Конвертируем в Vector3D для математики
+            Vector3D v3d = new Vector3D(v.getX(), v.getY(), v.getZ());
+
+            //Умножаем вершину на матрицу (M * v)
+            Vector3D transformedV = modelMatrix.multiplyByVector(v3d);
+
+            //Сохраняем результат
+            newVertices.add(new Vector3D(transformedV.getX(), transformedV.getY(), transformedV.getZ()));
+        }
+        tempMesh.setVertices(newVertices);
+
+        //Пересчитываем нормали, если они есть
+        //Для правильного поворота нормалей нужна "Обратная Транспонированная" матрица
+        if (!originalMesh.getNormals().isEmpty()) {
+            ArrayList<Vector3D> newNormals = new ArrayList<>();
+
+            //Получаем матрицу для нормалей: (M^-1)^T
+            //Берем 3x3 часть (вращение и масштаб), инвертируем и транспонируем
+            var normalMatrix = modelMatrix.toMatrix3x3().inverse().transpose();
+
+            for (Vector3D n : originalMesh.getNormals()) {
+                Vector3D n3d = new Vector3D(n.getX(), n.getY(), n.getZ());
+
+                //Умножаем и обязательно нормализуем
+                Vector3D transformedN = normalMatrix.multiplyByVector(n3d).normalization();
+
+                newNormals.add(new Vector3D(transformedN.getX(), transformedN.getY(), transformedN.getZ()));
+            }
+            tempMesh.setNormals(newNormals);
+        }
+
+        //Отдаем эту временную модель ObjWriter
+        ObjWriter.writeObjToFile(tempMesh, filePath);
+    }
+
+    @FXML
+    private void onRenderButtonClick() {
+        // Если модели нет, выходим
+        if (mesh == null) {
+            DialogUtils.showError("Error", "Load the model first!");
+            return;
+        }
+
+        try {
+            float tx = Float.parseFloat(translateX.getText());
+            float ty = Float.parseFloat(translateY.getText());
+            float tz = Float.parseFloat(translateZ.getText());
+
+            //Полагаем, что ввод в градусах
+            float rx = Float.parseFloat(rotateX.getText());
+            float ry = Float.parseFloat(rotateY.getText());
+            float rz = Float.parseFloat(rotateZ.getText());
+
+            float sx = Float.parseFloat(scaleX.getText());
+            float sy = Float.parseFloat(scaleY.getText());
+            float sz = Float.parseFloat(scaleZ.getText());
+
+            mesh.getAffineTransformer().changeModelMatrixForDegree(
+                    sx, sy, sz,
+                    rx, ry, rz,
+                    tx, ty, tz
+            );
+
+        } catch (NumberFormatException e) {
+            DialogUtils.showError("Input Error", "Please enter valid numbers in transformation fields.");
+        } catch (Exception e) {
+            DialogUtils.showError("Error", "An unexpected error occurred during rendering setup.");
+        }
+    }
+
 
     @FXML public void handleCameraForward(ActionEvent actionEvent) { camera.movePosition(new Vector3D(0, 0, -TRANSLATION)); }
     @FXML public void handleCameraBackward(ActionEvent actionEvent) { camera.movePosition(new Vector3D(0, 0, TRANSLATION)); }

@@ -4,7 +4,6 @@
     -fx-background-color: #2b2b2b;
 }
 
-/* Красивые кнопки (Тёмная тема) */
 /* Кнопки справа (Load Texture, Delete, Reset Camera) */
 .button {
     -fx-background-color: #333537; /* чуть темнее фона панели */
@@ -24,36 +23,30 @@
     -fx-background-color: #525557;
 }
 
-/* Меню бар */
 .menu-bar {
-    -fx-background-color: #1d1d1d; /* Очень темный фон, темнее чем остальное окно */
+    -fx-background-color: #1d1d1d; /* Очень темный фон */
     -fx-padding: 2 5 2 5;
     -fx-border-color: #333333; /* Линия разделителя снизу */
     -fx-border-width: 0 0 1 0;
 }
 
+/* Стиль для особых кнопок (Рендер, Показать панель) */
 /* Стилизация Тумблера (Общий стиль) */
-.toggle-button {
-    -fx-background-color: #3c3f41;
-    -fx-text-fill: #bbbbbb;
+.accent-button {
+    -fx-background-color: #4772b3; /* СИНИЙ сразу */
+    -fx-text-fill: white;
     -fx-background-radius: 20;
-    -fx-border-color: #555555;
+    -fx-border-color: #4772b3;
     -fx-border-radius: 20;
     -fx-cursor: hand;
+    -fx-padding: 5 15 5 15;
 }
 
-/* СИНИЙ цвет (как ты просил), но только для кнопки Show Panel */
-#sidebarToggle:selected {
-    -fx-background-color: #4772b3; /* Тот самый синий */
+/* При наведении */
+.accent-button:hover {
+    -fx-background-color: #5a8bd6;
+    -fx-border-color: #5a8bd6;
     -fx-text-fill: white;
-    -fx-border-color: #4772b3;
-}
-
-/* Кнопка переключения темы при нажатии останется нейтральной (серой) */
-#themeSwitch:selected {
-    -fx-background-color: #5c6062;
-    -fx-text-fill: white;
-    -fx-border-color: #555555;
 }
 
 /* Сами кнопки (File, Camera Options) */
@@ -69,7 +62,7 @@
     -fx-font-size: 12px;
 }
 
-/* Эффект при наведении (Hover) - НЕ СИНИЙ, а светло-серый как в Блендере */
+/* Эффект при наведении */
 .menu-bar .menu-button:hover,
 .menu-bar .menu-button:showing {
     -fx-background-color: #444444;
@@ -90,12 +83,11 @@
 }
 
 .menu-item:focused {
-    -fx-background-color: #4772b3; /* Здесь можно оставить синий акцент для выбранного пункта, или сделать #444 для серого */
+    -fx-background-color: #4772b3;
     -fx-text-fill: white;
 }
 
-/* Текстовые поля ввода */
-/* Текстовые поля ввода Position, Scale */
+/* Текстовые поля ввода Position, Rotation, Scale */
 .text-field {
     -fx-background-color: #333537;  /* тот же оттенок, что и кнопки */
     -fx-text-fill: white;
@@ -105,7 +97,6 @@
     -fx-border-radius: 4;
 }
 
-/* Скролл панель */
 .scroll-pane {
     -fx-background-color: transparent;
 }
@@ -113,7 +104,7 @@
     -fx-background-color: transparent;
 }
 
-/* --- Стили для Диалоговых окон (Alerts) --- */
+/* Стили для Диалоговых окон (Alerts) */
 
 .dialog-pane {
     /* Основной фон всего окна */
@@ -132,7 +123,7 @@
 
 /* Цвет текста (И лейблов, и основного сообщения) */
 .dialog-pane .label {
-    -fx-text-fill: #e0e0e0; /* Светло-серый, читабельный */
+    -fx-text-fill: #e0e0e0;
     -fx-font-size: 14px;
 }
 

@@ -4,7 +4,6 @@
     -fx-background-color: #f4f4f4;
 }
 
-/* Красивые кнопки (Светлая тема) */
 .button {
     -fx-background-color: #e0e0e0; /* Чуть темнее фона, чтобы выделяться */
     -fx-text-fill: #333333;
@@ -31,28 +30,23 @@
     -fx-border-width: 0 0 1 0;
 }
 
+/* Стиль для особых кнопок (Рендер, Показать панель) */
 /* Стилизация Тумблера (Общий стиль для всех) */
-.toggle-button {
-    -fx-background-color: #ffffff; /* Белый фон */
-    -fx-text-fill: #333333;
-    -fx-background-radius: 20;
-    -fx-border-color: #bbbbbb;
+.accent-button {
+    -fx-background-color: #4CAF50; /* ЗЕЛЕНЫЙ сразу, а не только при нажатии */
+    -fx-text-fill: white;
+    -fx-background-radius: 20;     /* Круглые края */
+    -fx-border-color: #4CAF50;
     -fx-border-radius: 20;
     -fx-cursor: hand;
+    -fx-padding: 5 15 5 15;
 }
 
-/* --- ВАЖНО: Зеленый цвет ТОЛЬКО для кнопки Show Panel --- */
-#sidebarToggle:selected {
-    -fx-background-color: #4CAF50; /* Зеленый */
+/* При наведении - чуть светлее */
+.accent-button:hover {
+    -fx-background-color: #66bb6a;
+    -fx-border-color: #66bb6a;
     -fx-text-fill: white;
-    -fx-border-color: #4CAF50;
-}
-
-/* А кнопка переключения темы при нажатии будет просто серой (как обычная нажатая кнопка) */
-#themeSwitch:selected {
-    -fx-background-color: #e0e0e0;
-    -fx-text-fill: #333333;
-    -fx-border-color: #bbbbbb;
 }
 
 /* Сами кнопки меню (File, Camera Options) */
@@ -103,7 +97,6 @@
     -fx-border-radius: 4;
 }
 
-/* Скролл панель */
 .scroll-pane {
     -fx-background-color: transparent;
 }
@@ -117,7 +110,7 @@
     -fx-border-color: transparent;
 }
 
-/* --- Стили для Диалоговых окон (Alerts) --- */
+/* Стили для Диалоговых окон (Alerts) */
 
 .dialog-pane {
     /* Основной фон всего окна */

@@ -62,7 +62,6 @@ public class ObjReader {
 			}
 		}
 
-		//System.out.println(result.getVertices());
 		return result;
 	}
 
