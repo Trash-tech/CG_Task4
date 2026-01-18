@@ -1,23 +1,21 @@
-# IntelliJ IDEA
+# IntelliJ IDEA (настройки среды)
 .idea/
 *.iml
+*.iws
+*.ipr
 
-# Maven build
+# Maven (папка сборки)
 target/
-out/
-build/
+dependency-reduced-pom.xml
 
 # Logs and temp files
 *.log
 *.tmp
 
-# OS junk
+# OS junk (системный мусор)
 .DS_Store
 Thumbs.db
 
-# Obj files
-*.obj
-*.mtl
-
-# Bytecode
-*.classs
+# Если не хочешь хранить сами exe/jar в корне (на всякий случай)
+*.jar
+*.exe
