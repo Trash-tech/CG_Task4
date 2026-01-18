@@ -58,6 +58,7 @@ public class Model {
         return model;
     }
 
+
     public static ArrayList<Vector3D> cloneArrayList(ArrayList<Vector3D> a){
         ArrayList<Vector3D> result = new ArrayList<>();
         for (int i = 0; i < a.size(); i++){
