@@ -35,9 +35,10 @@
 .accent-button {
     -fx-background-color: #4772b3; /* СИНИЙ сразу */
     -fx-text-fill: white;
-    -fx-background-radius: 20;
+    -fx-background-radius: 5;
+    -fx-border-radius: 5;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.4), 3, 0, 0, 1);
     -fx-border-color: #4772b3;
-    -fx-border-radius: 20;
     -fx-cursor: hand;
     -fx-padding: 5 15 5 15;
 }

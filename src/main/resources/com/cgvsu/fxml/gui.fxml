@@ -29,48 +29,38 @@
         <VBox>
             <MenuBar fx:id="menuBar">
                 <Menu mnemonicParsing="false" text="Файл">
-                    <MenuItem mnemonicParsing="false" onAction="#onOpenModelMenuItemClick" text="Load Model">
+                    <MenuItem mnemonicParsing="false" onAction="#onOpenModelMenuItemClick" text="Загрузить модель">
                         <accelerator>
                             <KeyCodeCombination alt="UP" control="DOWN" meta="UP" shift="UP" shortcut="UP" code="F"/>
                         </accelerator>
                     </MenuItem>
                     <!-- Добавили пункт в меню -->
-                    <MenuItem mnemonicParsing="false" onAction="#onSaveModelMenuItemClick" text="Save Model">
+                    <MenuItem mnemonicParsing="false" onAction="#onSaveModelMenuItemClick" text="Сохранить модель">
                         <accelerator>
                             <KeyCodeCombination alt="UP" control="DOWN" meta="UP" shift="UP" shortcut="UP" code="S"/>
                         </accelerator>
                     </MenuItem>
                 </Menu>
-                <Menu mnemonicParsing="false" text="Управление камерой">
-                    <MenuItem mnemonicParsing="false" onAction="#handleCameraForward" text="Forward">
-                        <accelerator><KeyCodeCombination alt="UP" control="UP" meta="UP" shift="UP" shortcut="UP" code="UP"/></accelerator>
-                    </MenuItem>
-                    <MenuItem mnemonicParsing="false" onAction="#handleCameraBackward" text="Backward">
-                        <accelerator><KeyCodeCombination alt="UP" control="UP" meta="UP" shift="UP" shortcut="UP" code="DOWN"/></accelerator>
-                    </MenuItem>
-                    <MenuItem mnemonicParsing="false" onAction="#handleCameraLeft" text="Left">
-                        <accelerator><KeyCodeCombination alt="UP" control="UP" meta="UP" shift="UP" shortcut="UP" code="LEFT"/></accelerator>
-                    </MenuItem>
-                    <MenuItem mnemonicParsing="false" onAction="#handleCameraRight" text="Right">
-                        <accelerator><KeyCodeCombination alt="UP" control="UP" meta="UP" shift="UP" shortcut="UP" code="RIGHT"/></accelerator>
-                    </MenuItem>
-                    <MenuItem mnemonicParsing="false" onAction="#handleCameraUp" text="Up">
-                        <accelerator><KeyCodeCombination alt="UP" control="UP" meta="UP" shift="UP" shortcut="UP" code="W"/></accelerator>
-                    </MenuItem>
-                    <MenuItem mnemonicParsing="false" onAction="#handleCameraDown" text="Down">
-                        <accelerator><KeyCodeCombination alt="UP" control="UP" meta="UP" shift="UP" shortcut="UP" code="S"/></accelerator>
+                <Menu mnemonicParsing="false" text="Справка">
+                    <MenuItem mnemonicParsing="false" onAction="#onShowHelpMenuItemClick" text="Управление">
+                        <accelerator>
+                            <!-- Горячая клавиша F1 -->
+                            <KeyCodeCombination alt="UP" control="UP" meta="UP" shift="UP" shortcut="UP" code="F1"/>
+                        </accelerator>
                     </MenuItem>
                 </Menu>
             </MenuBar>
 
             <ToolBar>
-                <Button mnemonicParsing="false" onAction="#onOpenModelMenuItemClick" text="Загрузить модель" />
-                <Button mnemonicParsing="false" onAction="#onSaveModelMenuItemClick" text="Сохранить модель" />
-                <Region prefWidth="20.0" />
+                <!-- <Button mnemonicParsing="false" onAction="#onOpenModelMenuItemClick" text="Загрузить модель" /> -->
+                <!-- <Button mnemonicParsing="false" onAction="#onSaveModelMenuItemClick" text="Сохранить модель" /> -->
+                <!-- <Region prefWidth="5.0" /> -->
                 <Button mnemonicParsing="false" onAction="#handleCameraForward" text="Вперед" />
                 <Button mnemonicParsing="false" onAction="#handleCameraBackward" text="Назад" />
                 <Button mnemonicParsing="false" onAction="#handleCameraRight" text="Вправо" />
                 <Button mnemonicParsing="false" onAction="#handleCameraLeft" text="Влево" />
+                <Button mnemonicParsing="false" onAction="#handleCameraRight" text="Вверх" />
+                <Button mnemonicParsing="false" onAction="#handleCameraLeft" text="Вниз" />
 
                 <Region HBox.hgrow="ALWAYS" />
 
@@ -87,7 +77,7 @@
                 <Region prefWidth="10.0" />
 
                 <ToggleButton fx:id="themeSwitch" styleClass="accent-button"
-                              mnemonicParsing="false" onAction="#switchTheme" text="Dark Mode" />
+                              mnemonicParsing="false" onAction="#switchTheme" text="Тёмная тема" />
             </ToolBar>
         </VBox>
     </top>
@@ -106,14 +96,14 @@
                 <ScrollPane fitToWidth="true" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                     <content>
                         <VBox spacing="10.0" style="-fx-padding: 10;">
-                            <Label text="Inspector" style="-fx-font-weight: bold; -fx-font-size: 14px;"/>
+                            <!-- <Label text="Inspector" style="-fx-font-weight: bold; -fx-font-size: 14px;"/> -->
 
                             <!-- Секция: Модели -->
                             <TitledPane text="Модели" expanded="true">
                                 <VBox spacing="5">
                                     <ListView fx:id="modelsListView" prefHeight="100.0" />
-                                    <Button text="Remove Model" maxWidth="Infinity" onAction="#onRemoveModelClick"/>
-                                    <Button text="Загрузить текстуру" maxWidth="Infinity"/>
+                                    <Button text="Удалить модель" maxWidth="Infinity" onAction="#onRemoveModelClick"/>
+                                    <!-- <Button text="Загрузить текстуру" maxWidth="Infinity"/> -->
                                 </VBox>
                             </TitledPane>
 
@@ -156,7 +146,13 @@
                                         <Label text="Z:" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
                                         <TextField fx:id="translateZ" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
                                     </GridPane>
+
+                                    <Separator />
+
+                                    <Button text="Применить" maxWidth="Infinity" onAction="#onApplyTransformClick"/>
+
                                 </VBox>
+
                             </TitledPane>
 
                             <!-- Секция: Камера -->

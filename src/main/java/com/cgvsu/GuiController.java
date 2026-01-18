@@ -194,7 +194,7 @@ public class GuiController {
     @FXML
     private void switchTheme(ActionEvent event) {
         toggleTheme(themeSwitch.isSelected());
-        themeSwitch.setText(themeSwitch.isSelected() ? "Light Mode" : "Dark Mode");
+        themeSwitch.setText(themeSwitch.isSelected() ? "Светлая тема" : "Тёмная тема");
     }
 
     public void toggleTheme(boolean dark) {
@@ -218,7 +218,7 @@ public class GuiController {
     private void onOpenModelMenuItemClick() {
         FileChooser fileChooser = new FileChooser();
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Model (*.obj)", "*.obj"));
-        fileChooser.setTitle("Load Model");
+        fileChooser.setTitle("Сохранение модели");
 
         File file = fileChooser.showOpenDialog((Stage) canvas.getScene().getWindow());
         if (file == null) {
@@ -236,15 +236,15 @@ public class GuiController {
             // Выделяем новую модель автоматически
             modelsListView.getSelectionModel().selectLast();
 
-            DialogUtils.showInfo("Success!", "The model was successfully uploaded from the file:\n"
+            DialogUtils.showInfo("Успех!", "Модель была успешно загружена из файла:\n"
                     + file.getName());
         } catch (ObjReaderException e) {
-            DialogUtils.showError("File reading error", e.getMessage());
+            DialogUtils.showError("Ошибка чтения файла", e.getMessage());
         } catch (IOException e) {
-            DialogUtils.showError("File access error", "The file could not be read: " + e.getMessage());
+            DialogUtils.showError("Ошибка доступа к файлу", "Файл не удалось прочитать: " + e.getMessage());
         } catch (Exception e) {
             //Непредвиденные ошибки
-            DialogUtils.showError("Unknown error", e.getMessage());
+            DialogUtils.showError("Неизвестная ошибка", e.getMessage());
         }
     }
 
@@ -266,30 +266,30 @@ public class GuiController {
     @FXML
     private void onSaveModelMenuItemClick() {
         if (selectedMesh == null) {
-            DialogUtils.showError("Saving error", "Upload the model first!");
+            DialogUtils.showError("Ошибка сохранения", "Сначала загрузите модель!");
             return;
         }
 
         Dialog<ButtonType> dialog = new Dialog<>();
-        dialog.setTitle("Save Model");
-        dialog.setHeaderText("Export Settings");
+        dialog.setTitle("Сохранение модели");
+        dialog.setHeaderText("Настройки экспорта");
 
         if (rootPane.getScene() != null && !rootPane.getScene().getStylesheets().isEmpty()) {
             dialog.getDialogPane().getStylesheets().add(rootPane.getScene().getStylesheets().get(0));
         }
 
-        Label label = new Label("Select save mode:");
+        Label label = new Label("Выберите режим сохранения:");
         ComboBox<String> modeComboBox = new ComboBox<>();
-        modeComboBox.getItems().addAll("Original Model", "Transformed Model");
+        modeComboBox.getItems().addAll("Исходная модель", "Трансформированная модель");
         modeComboBox.getSelectionModel().selectFirst();
 
         VBox content = new VBox(10);
         content.getChildren().addAll(label, modeComboBox);
         dialog.getDialogPane().setContent(content);
 
-        // --- Создаем кнопки (ТОЛЬКО SAVE и CANCEL) ---
-        ButtonType saveButtonType = new ButtonType("Save", ButtonBar.ButtonData.OK_DONE);
-        ButtonType cancelButtonType = new ButtonType("Cancel", ButtonBar.ButtonData.CANCEL_CLOSE);
+        //Создаем кнопки (ТОЛЬКО SAVE и CANCEL)
+        ButtonType saveButtonType = new ButtonType("Сохранить", ButtonBar.ButtonData.OK_DONE);
+        ButtonType cancelButtonType = new ButtonType("Отмена", ButtonBar.ButtonData.CANCEL_CLOSE);
 
         dialog.getDialogPane().getButtonTypes().setAll(saveButtonType, cancelButtonType);
 
@@ -297,11 +297,11 @@ public class GuiController {
         Optional<ButtonType> result = dialog.showAndWait();
 
         if (result.isPresent() && result.get() == saveButtonType) {
-            boolean saveTransformed = modeComboBox.getValue().equals("Transformed Model");
+            boolean saveTransformed = modeComboBox.getValue().equals("Трансформированная модель");
 
             FileChooser fileChooser = new FileChooser();
             fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Model (*.obj)", "*.obj"));
-            fileChooser.setTitle("Save Model");
+            fileChooser.setTitle("Сохранение модели");
 
             // Имя файла зависит от выбора в ComboBox
             String defaultName = saveTransformed ? "model_transformed.obj" : "model_original.obj";
@@ -316,14 +316,14 @@ public class GuiController {
                 if (saveTransformed) {
                     // Сохраняем трансформированную
                     saveTransformedModel(selectedMesh, file.getAbsolutePath());
-                    DialogUtils.showInfo("Success", "Transformed model saved successfully.");
+                    DialogUtils.showInfo("Успешно!", "Преобразованная модель успешно сохранена.");
                 } else {
                     // Сохраняем оригинал
                     ObjWriter.writeObjToFile(selectedMesh, file.getAbsolutePath());
-                    DialogUtils.showInfo("Success", "Original model saved successfully.");
+                    DialogUtils.showInfo("Успешно!", "Исходная модель успешно сохранена.");
                 }
             } catch (Exception e) {
-                DialogUtils.showError("Error", "Failed to save model: " + e.getMessage());
+                DialogUtils.showError("Ошибка!", "Не удалось сохранить модель: " + e.getMessage());
                 e.printStackTrace();
             }
         }
@@ -335,10 +335,10 @@ public class GuiController {
     }
 
     @FXML
-    private void onRenderButtonClick() {
+    private void onApplyTransformClick() {
         // Если модели нет, выходим
         if (selectedMesh == null) {
-            DialogUtils.showError("Error", "Load the model first!");
+            DialogUtils.showError("Ошибка!", "Сначала выберите модель из списка!");
             return;
         }
 
@@ -347,7 +347,7 @@ public class GuiController {
             float ty = Float.parseFloat(translateY.getText());
             float tz = Float.parseFloat(translateZ.getText());
 
-            //Полагаем, что ввод в градусах
+            // Полагаем, что ввод в градусах
             float rx = Float.parseFloat(rotateX.getText());
             float ry = Float.parseFloat(rotateY.getText());
             float rz = Float.parseFloat(rotateZ.getText());
@@ -363,10 +363,43 @@ public class GuiController {
             );
 
         } catch (NumberFormatException e) {
-            DialogUtils.showError("Input Error", "Please enter valid numbers in transformation fields.");
+            DialogUtils.showError("Ошибка ввода", "Пожалуйста, введите корректные числа.");
         } catch (Exception e) {
-            DialogUtils.showError("Error", "An unexpected error occurred during rendering setup.");
+            DialogUtils.showError("Ошибка", "Не удалось применить трансформацию: " + e.getMessage());
         }
+    }
+
+    @FXML
+    private void onRenderButtonClick() {
+        // Пока функционал снят, можно вывести сообщение или просто оставить пустым
+    }
+
+    @FXML
+    private void onShowHelpMenuItemClick() {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Справка");
+        alert.setHeaderText("Управление и горячие клавиши");
+
+        // Текст справки (потом поменяешь на свой)
+        alert.setContentText(
+                "Управление камерой:\n" +
+                        "• W / S - Движение вперед / назад\n" +
+                        "• A / D - Движение влево / вправо\n" +
+                        "• UP / DOWN - Движение вверх / вниз\n\n" +
+                        "Работа с файлами:\n" +
+                        "• Ctrl + F - Загрузить модель\n" +
+                        "• Ctrl + S - Сохранить текущую модель\n\n" +
+                        "Интерфейс:\n" +
+                        "• Выберите модель в списке справа, чтобы редактировать её.\n" +
+                        "• Нажмите 'Рендер' для применения трансформаций."
+        );
+
+        // Применяем текущую CSS тему (Темную или Светлую), чтобы окно не было белым пятном
+        if (rootPane.getScene() != null && !rootPane.getScene().getStylesheets().isEmpty()) {
+            alert.getDialogPane().getStylesheets().add(rootPane.getScene().getStylesheets().get(0));
+        }
+
+        alert.showAndWait();
     }
 
 
